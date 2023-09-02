@@ -29,11 +29,15 @@ except (ImportError, IOError) as err:
     _logger.debug(err)
 
 
-class AccountInvoiceRefund(models.TransientModel):
-    _inherit = "account.invoice.refund"
+class AccountMoveReversal(models.TransientModel):
+    _inherit = "account.move.reversal"
 
-    filter_refund = fields.Selection(
-        selection_add=[("discount", "Descuento"), ("debit", "Nota de Débito")]
+    refund_method = fields.Selection(
+        selection_add=[("discount", "Descuento"), ("debit", "Nota de Débito")],
+        ondelete={
+            "discount": lambda recs: recs.write({"refund_method": "refund"}),
+            "debit": lambda recs: recs.write({"refund_method": "refund"}),
+        },
     )
 
     amount = fields.Float("Monto")
@@ -42,10 +46,10 @@ class AccountInvoiceRefund(models.TransientModel):
     invoice_type = fields.Char(default=lambda s: s._context.get("type", False))
     journal_purchase_type = fields.Char(string="Tipo de Compra")
 
-    @api.onchange("filter_refund")
+    @api.onchange("refund_method")
     def onchange_filter_refund(self):
         invoice_id = self.env.context.get("active_ids")
-        invoice = self.env["account.invoice"].browse(invoice_id[0])
+        invoice = self.env["account.move"].browse(invoice_id[0])
 
         self.journal_purchase_type = invoice.journal_id.purchase_type
         self.supplier_ncf = False
@@ -57,9 +61,7 @@ class AccountInvoiceRefund(models.TransientModel):
         if self.supplier_ncf:
             ctx.update({"credit_note_supplier_ncf": self.supplier_ncf})
 
-        result = super(AccountInvoiceRefund, self.with_context(ctx)).compute_refund(
-            mode
-        )
+        result = super(AccountMoveReversal, self.with_context(ctx)).compute_refund(mode)
 
         active_ids = self.env.context.get("active_ids")
         if not active_ids:  # pragma: no cover
@@ -140,7 +142,7 @@ class AccountInvoiceRefund(models.TransientModel):
     def invoice_refund(self):
         active_id = self._context.get("active_id", False)
         if active_id:
-            invoice = self.env["account.invoice"].browse(active_id)
+            invoice = self.env["account.move"].browse(active_id)
 
             if (
                 self.filter_refund != "debit"
@@ -197,4 +199,4 @@ class AccountInvoiceRefund(models.TransientModel):
                         ).format(self.supplier_ncf, invoice.partner_id.name)
                     )
 
-        return super(AccountInvoiceRefund, self).invoice_refund()
+        return super(AccountMoveReversal, self).invoice_refund()

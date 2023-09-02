@@ -16,10 +16,10 @@
         <field name="model">res.currency</field>
         <field name="inherit_id" ref="base.view_currency_form"/>
         <field name="arch" type="xml">
-            <field name="rate" position="after">
-                <field name="bc_rate_xls" attrs="{'invisible': [('name','!=','USD')]}" group="base.group_system"/>
+            <field name="position" position="after">
+                <field name="bc_rate_xls" attrs="{'invisible': [('name','!=','USD')]}" groups="base.group_system"/>
                 <button name="update_rate_from_files" string="Actualizar desde el archivo del BC" type="object" class="oe_highlight"
-                attrs="{'invisible': [('bc_rate_xls','=',False)]}" group="base.group_system"/>
+                attrs="{'invisible': [('bc_rate_xls','=',False)]}" groups="base.group_system"/>
             </field>
         </field>
     </record>
