@@ -52,59 +52,6 @@ class IrSequence(models.Model):
             )
         return super(IrSequence, self).get_next_char(number_next)
 
-    def _next(self):
-        """Returns the next number in the preferred sequence in all the
-        ones given in self."""
-        sale_fiscal_type = self._context.get("sale_fiscal_type", False)
-        dt = fields.Date.today()
-
-        if sale_fiscal_type:
-            if not self.use_date_range:
-                return self._next_do()
-            # date mode
-            if self._context.get("ir_sequence_date"):
-                dt = self._context.get("ir_sequence_date")
-
-            seq_date = self.env["ir.sequence.date_range"].search(
-                [
-                    ("sale_fiscal_type", "=", sale_fiscal_type),
-                    ("sequence_id", "=", self.id),
-                    ("date_from", "<=", dt),
-                    ("date_to", ">=", dt),
-                ],
-                limit=1,
-            )
-            if not seq_date:
-                seq_date = self._create_date_range_seq(dt)
-            return seq_date.with_context(
-                ir_sequence_date_range=seq_date.date_from
-            )._next()
-        else:
-            # date mode
-            if self._context.get("ir_sequence_date"):
-                dt = self._context.get("ir_sequence_date")
-
-            seq_date = self.env["ir.sequence.date_range"].search(
-                [
-                    ("sale_fiscal_type", "=", False),
-                    ("sequence_id", "=", self.id),
-                    ("date_from", "<=", dt),
-                    ("date_to", ">=", dt),
-                ],
-                limit=1,
-            )
-            if seq_date:
-                return seq_date.with_context(
-                    ir_sequence_date_range=seq_date.date_from
-                )._next()
-            return super(IrSequence, self)._next()
-
-    def write(self, vals):
-        if self._context.get("params", {}).get("model", {}) == "account.invoice":
-            return True
-
-        return super(IrSequence, self).write(vals)
-
 
 class IrSequenceDateRange(models.Model):
     _inherit = "ir.sequence.date_range"

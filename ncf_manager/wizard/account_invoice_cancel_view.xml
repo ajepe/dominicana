@@ -19,7 +19,6 @@
         <record id="action_account_invoice_cancel" model="ir.actions.act_window">
             <field name="name">Cancel Selected Invoices</field>
             <field name="res_model">account.invoice.cancel</field>
-            <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="account_invoice_cancel_view"/>
             <field name="target">new</field>

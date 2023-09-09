@@ -15,6 +15,5 @@ class DgiiReportRegenerateWizard(models.TransientModel):
 
     report_id = fields.Many2one("dgii.reports", "Report")
 
-    @api.multi
     def regenerate(self):
         self.report_id._generate_report()

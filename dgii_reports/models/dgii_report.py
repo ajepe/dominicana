@@ -45,7 +45,6 @@ class DgiiReport(models.Model):
     _description = "DGII Report"
     _inherit = ["mail.thread"]
 
-    @api.multi
     def _compute_previous_report_pending(self):
         for report in self:
             previous = self.search(
@@ -101,7 +100,6 @@ class DgiiReport(models.Model):
         )
     ]
 
-    @api.multi
     def _compute_606_fields(self):
         for rec in self:
             data = {
@@ -148,7 +146,6 @@ class DgiiReport(models.Model):
             rec.purchase_other_taxes = abs(data["purchase_other_taxes"])
             rec.purchase_legal_tip = abs(data["purchase_legal_tip"])
 
-    @api.multi
     def _compute_607_fields(self):
         for rec in self:
             data = {
@@ -183,7 +180,6 @@ class DgiiReport(models.Model):
             rec.sale_other_taxes = abs(data["sale_other_taxes"])
             rec.sale_legal_tip = abs(data["sale_legal_tip"])
 
-    @api.multi
     def _compute_608_fields(self):
         for rec in self:
             cancel_line_ids = self.env["dgii.reports.cancel.line"].search(
@@ -191,7 +187,6 @@ class DgiiReport(models.Model):
             )
             rec.cancel_records = len(cancel_line_ids)
 
-    @api.multi
     def _compute_609_fields(self):
         for rec in self:
             data = {
@@ -329,7 +324,6 @@ class DgiiReport(models.Model):
 
         return super(DgiiReport, self).create(vals)
 
-    @api.multi
     def write(self, vals):
         self._validate_date_format(vals.get("name"))
 
@@ -340,7 +334,6 @@ class DgiiReport(models.Model):
         return date.year, date.month
 
     def _get_pending_invoices(self, types):
-
         period = dt.strptime(self.name, "%m/%Y")
 
         month, year = self.name.split("/")
@@ -348,7 +341,7 @@ class DgiiReport(models.Model):
             year, month, calendar.monthrange(int(year), int(month))[1]
         )
         invoice_ids = (
-            self.env["account.invoice"]
+            self.env["account.move"]
             .search(
                 [
                     ("fiscal_status", "=", "normal"),
@@ -379,7 +372,7 @@ class DgiiReport(models.Model):
         end_date = "{}-{}-{}".format(year, month, last_day)
 
         invoice_ids = (
-            self.env["account.invoice"]
+            self.env["account.move"]
             .search(
                 [
                     ("date_invoice", ">=", start_date),
@@ -417,7 +410,6 @@ class DgiiReport(models.Model):
             return False
 
     def _get_formated_date(self, date):
-
         return (
             dt.strptime(date, "%Y-%m-%d").strftime("%Y%m%d")
             if isinstance(date, str)
@@ -427,11 +419,9 @@ class DgiiReport(models.Model):
         )
 
     def _get_formated_amount(self, amount):
-
         return str("{:.2f}".format(abs(amount))).ljust(12)
 
     def process_606_report_data(self, values):
-
         RNC = str(values["rnc_cedula"] if values["rnc_cedula"] else "")
         ID_TYPE = str(
             values["identification_type"] if values["identification_type"] else ""
@@ -497,7 +487,6 @@ class DgiiReport(models.Model):
         )
 
     def _generate_606_txt(self, records, qty):
-
         keep_txt_spaces = int(
             self.env["ir.config_parameter"]
             .sudo()
@@ -531,7 +520,7 @@ class DgiiReport(models.Model):
         New reported invoices should not include any
         withholding amount nor payment date
         if payment was made after current period.
-        :param invoice: account.invoice object
+        :param invoice: account.move object
         :return: boolean
         """
         if not invoice.payment_date:
@@ -546,7 +535,6 @@ class DgiiReport(models.Model):
 
         return True if (payment_date and same_minor_period) else False
 
-    @api.multi
     def _compute_606_data(self):
         for rec in self:
             PurchaseLine = self.env["dgii.reports.purchase.line"]
@@ -630,7 +618,7 @@ class DgiiReport(models.Model):
 
     @staticmethod
     def include_payment(invoice_id, payment_id):
-        """ Returns True if payment date is on or before current period """
+        """Returns True if payment date is on or before current period"""
 
         p_date = payment_id.payment_date
         i_date = invoice_id.date_invoice
@@ -644,7 +632,7 @@ class DgiiReport(models.Model):
     def _get_sale_payments_forms(self, invoice_id):
         payments_dict = self._get_payments_dict()
         Payment = self.env["account.payment"]
-        Invoice = self.env["account.invoice"]
+        Invoice = self.env["account.move"]
 
         if invoice_id.type == "out_invoice":
             for payment in invoice_id._get_invoice_payment_widget():
@@ -765,7 +753,6 @@ class DgiiReport(models.Model):
 
         return op_dict
 
-    @api.multi
     def _set_payment_form_fields(self, payments_dict):
         for rec in self:
             rec.cash = payments_dict.get("cash")
@@ -794,7 +781,6 @@ class DgiiReport(models.Model):
             income_dict[invoice.income_type] += invoice.amount_untaxed_signed
         return income_dict
 
-    @api.multi
     def _set_income_type_fields(self, income_dict):
         for rec in self:
             rec.opr_income = income_dict.get("01")
@@ -813,7 +799,6 @@ class DgiiReport(models.Model):
             )
 
     def process_607_report_data(self, values):
-
         RNC = str(values["rnc_cedula"] if values["rnc_cedula"] else "").ljust(11)
         ID_TYPE = str(
             values["identification_type"] if values["identification_type"] else ""
@@ -873,7 +858,6 @@ class DgiiReport(models.Model):
         )
 
     def _generate_607_txt(self, records, qty):
-
         company_vat = self.company_id.vat
         period = dt.strptime(self.name.replace("/", ""), "%m%Y").strftime("%Y%m")
 
@@ -911,7 +895,6 @@ class DgiiReport(models.Model):
     def _set_csmr_fields_vals(self, csmr_dict):
         self.write(csmr_dict)
 
-    @api.multi
     def _compute_607_data(self):
         for rec in self:
             SaleLine = self.env["dgii.reports.sale.line"]
@@ -1025,7 +1008,6 @@ class DgiiReport(models.Model):
             self._generate_607_txt(report_data, line - excluded_line)
 
     def process_608_report_data(self, values):
-
         NCF = str(values["fiscal_invoice_number"]).ljust(11)
         INV_DATE = str(self._get_formated_date(values["invoice_date"])).ljust(8)
         ANU_TYPE = str(values["anulation_type"]).ljust(2)
@@ -1033,7 +1015,6 @@ class DgiiReport(models.Model):
         return "|".join([NCF, INV_DATE, ANU_TYPE])
 
     def _generate_608_txt(self, records, qty):
-
         company_vat = self.company_id.vat
         period = dt.strptime(self.name.replace("/", ""), "%m%Y").strftime("%Y%m")
 
@@ -1051,7 +1032,6 @@ class DgiiReport(models.Model):
             }
         )
 
-    @api.multi
     def _compute_608_data(self):
         for rec in self:
             CancelLine = self.env["dgii.reports.cancel.line"]
@@ -1091,7 +1071,6 @@ class DgiiReport(models.Model):
             self._generate_608_txt(report_data, line)
 
     def process_609_report_data(self, values):
-
         LEGAL_NAME = str(values["legal_name"]).ljust(50)
         ID_TYPE = str(values["tax_id_type"] if values["tax_id_type"] else "")
         TAX_ID = str(values["tax_id"] if values["tax_id"] else "").ljust(50)
@@ -1133,7 +1112,6 @@ class DgiiReport(models.Model):
         )
 
     def _generate_609_txt(self, records, qty):
-
         company_vat = self.company_id.vat
         period = dt.strptime(self.name.replace("/", ""), "%m%Y").strftime("%Y%m")
 
@@ -1151,7 +1129,6 @@ class DgiiReport(models.Model):
             }
         )
 
-    @api.multi
     def _compute_609_data(self):
         for rec in self:
             ExteriorLine = self.env["dgii.reports.exterior.line"]
@@ -1197,7 +1174,6 @@ class DgiiReport(models.Model):
 
             self._generate_609_txt(report_data, line)
 
-    @api.multi
     def _generate_report(self):
         # Drop 607 NCF Operations for recompute
         self.env["dgii.reports.sale.summary"].search(
@@ -1210,7 +1186,6 @@ class DgiiReport(models.Model):
         self._compute_609_data()
         self.state = "generated"
 
-    @api.multi
     def generate_report(self):
         if self.state == "generated":
             action = self.env.ref(
@@ -1236,7 +1211,6 @@ class DgiiReport(models.Model):
             else False
         )
 
-    @api.multi
     def _invoice_status_sent(self):
         for report in self:
             PurchaseLine = self.env["dgii.reports.purchase.line"]
@@ -1274,7 +1248,7 @@ class DgiiReport(models.Model):
         are searched and updated in this function.
         """
 
-        invoice_ids = self.env["account.invoice"].search(
+        invoice_ids = self.env["account.move"].search(
             [
                 ("state", "=", "paid"),
                 ("fiscal_status", "=", "normal"),
@@ -1283,7 +1257,6 @@ class DgiiReport(models.Model):
         )
         invoice_ids.write({"fiscal_status": "done"})
 
-    @api.multi
     def state_sent(self):
         for report in self:
             report._invoice_status_sent()
@@ -1364,7 +1337,7 @@ class DgiiReportPurchaseLine(models.Model):
     payment_type = fields.Char()
 
     invoice_partner_id = fields.Many2one("res.partner")
-    invoice_id = fields.Many2one("account.invoice")
+    invoice_id = fields.Many2one("account.move")
     credit_note = fields.Boolean()
 
 
@@ -1402,7 +1375,7 @@ class DgiiReportSaleLine(models.Model):
     others = fields.Float()
 
     invoice_partner_id = fields.Many2one("res.partner")
-    invoice_id = fields.Many2one("account.invoice")
+    invoice_id = fields.Many2one("account.move")
     credit_note = fields.Boolean()
 
 
@@ -1418,7 +1391,7 @@ class DgiiCancelReportLine(models.Model):
     anulation_type = fields.Char(size=2)
 
     invoice_partner_id = fields.Many2one("res.partner")
-    invoice_id = fields.Many2one("account.invoice")
+    invoice_id = fields.Many2one("account.move")
 
 
 class DgiiExteriorReportLine(models.Model):
@@ -1441,4 +1414,4 @@ class DgiiExteriorReportLine(models.Model):
     isr_withholding_date = fields.Date()
     presumed_income = fields.Float()
     withholded_isr = fields.Float()
-    invoice_id = fields.Many2one("account.invoice")
+    invoice_id = fields.Many2one("account.move")

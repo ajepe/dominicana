@@ -197,7 +197,7 @@ class AccountInvoice(models.Model):
         """
         for inv in self:
             if (
-                inv.type == "out_invoice"
+                inv.move_type == "out_invoice"
                 and inv.state in ("open", "cancel")
                 and inv.sale_fiscal_type == "special"
             ):
@@ -322,27 +322,29 @@ class AccountInvoice(models.Model):
     @api.onchange("partner_id", "company_id")
     def _onchange_partner_id(self):
         res = super(AccountInvoice, self)._onchange_partner_id()
-        if self.partner_id and self.type == "out_invoice":
+        if self.partner_id and self.move_type == "out_invoice":
             if self.journal_id.ncf_control:
                 self.sale_fiscal_type = self.partner_id.sale_fiscal_type
                 self.special_check()
-            if not self.partner_id.customer:
-                self.partner_id.customer = True
-        elif self.partner_id and self.type == "in_invoice" and not self.expense_type:
+            if not self.partner_id.customer_rank:
+                self.partner_id.customer_rank = self.partner_id.customer_rank + 1
+        elif (
+            self.partner_id and self.move_type == "in_invoice" and not self.expense_type
+        ):
             self.expense_type = self.partner_id.expense_type
-            if not self.partner_id.supplier:
-                self.partner_id.supplier = True
+            if not self.partner_id.supplier_rank:
+                self.partner_id.supplier_rank = self.partner_id.supplier_rank + 1
 
         return res
 
     @api.onchange("sale_fiscal_type", "expense_type")
     def _onchange_fiscal_type(self):
         if self.partner_id:
-            if self.type == "out_invoice" and self.journal_id.ncf_control:
+            if self.move_type == "out_invoice" and self.journal_id.ncf_control:
                 self.partner_id.write({"sale_fiscal_type": self.sale_fiscal_type})
                 self.special_check()
 
-            if self.type == "in_invoice" and not self.partner_id.expense_type:
+            if self.move_type == "in_invoice" and not self.partner_id.expense_type:
                 self.partner_id.write({"expense_type": self.expense_type})
 
     def special_check(self):
@@ -356,7 +358,9 @@ class AccountInvoice(models.Model):
         if self.journal_id.purchase_type in ("normal", "informal", "minor"):
             self.validate_fiscal_purchase()
 
-        if self.origin_out and (self.type == "out_refund" or self.type == "in_refund"):
+        if self.origin_out and (
+            self.move_type == "out_refund" or self.move_type == "in_refund"
+        ):
             if (
                 self.journal_id.purchase_type in ("normal", "informal", "minor")
                 or self.journal_id.ncf_control
@@ -382,7 +386,7 @@ class AccountInvoice(models.Model):
         """
         for inv in self:
             if (
-                inv.type == "out_invoice"
+                inv.move_type == "out_invoice"
                 and inv.state in ("open", "cancel")
                 and inv.partner_id.country_id
                 and inv.partner_id.country_id.code != "DO"
@@ -421,7 +425,7 @@ class AccountInvoice(models.Model):
 
         for inv in self:
             if (
-                inv.type == "in_invoice"
+                inv.move_type == "in_invoice"
                 and inv.state == "open"
                 and inv.journal_id.purchase_type == "informal"
             ):
@@ -446,7 +450,7 @@ class AccountInvoice(models.Model):
                     )
                 )
 
-            if inv.type == "out_invoice" and inv.journal_id.ncf_control:
+            if inv.move_type == "out_invoice" and inv.journal_id.ncf_control:
                 if not inv.partner_id.sale_fiscal_type:
                     raise ValidationError(
                         _(
@@ -494,7 +498,7 @@ class AccountInvoice(models.Model):
                         )
                     )
 
-            elif inv.type in ("in_invoice", "in_refund"):
+            elif inv.move_type in ("in_invoice", "in_refund"):
                 if not inv.reference and inv.journal_id.purchase_type in (
                     "informal",
                     "minor",
@@ -543,7 +547,7 @@ class AccountInvoice(models.Model):
                         )
 
             elif (
-                inv.type == "out_refund"
+                inv.move_type == "out_refund"
                 and inv.journal_id.ncf_control
                 and inv.amount_untaxed_signed >= 250000
                 and not inv.partner_id.vat
@@ -570,7 +574,7 @@ class AccountInvoice(models.Model):
             journal_id=journal_id,
         )
 
-        if self.type == "out_invoice" and self.journal_id.ncf_control:
+        if self.move_type == "out_invoice" and self.journal_id.ncf_control:
             res.update({"reference": False, "origin_out": self.reference})
 
         if self._context.get("credit_note_supplier_ncf", False):
@@ -592,7 +596,7 @@ class AccountInvoice(models.Model):
             or self.journal_id.purchase_type in ["minor", "informal", "exterior"]
         ):
             sequence_id = self.journal_id.sequence_id
-            if self.type == "out_invoice":
+            if self.move_type == "out_invoice":
                 if self.is_nd:
                     self.reference = sequence_id.with_context(
                         sale_fiscal_type="debit_note"
@@ -601,11 +605,11 @@ class AccountInvoice(models.Model):
                     self.reference = sequence_id.with_context(
                         sale_fiscal_type=self.sale_fiscal_type
                     )._next()
-            elif self.type == "out_refund":
+            elif self.move_type == "out_refund":
                 self.reference = sequence_id.with_context(
                     sale_fiscal_type="credit_note"
                 )._next()
-            elif self.type == "in_invoice":
+            elif self.move_type == "in_invoice":
                 self.reference = sequence_id.with_context(
                     sale_fiscal_type=self.journal_id.purchase_type
                 )._next()

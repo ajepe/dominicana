@@ -24,7 +24,7 @@
 
 {
     "name": "Gestor de Comprobantes Fiscales (NCF Manager)",
-    "version": "12.0.1.2.0",
+    "version": "15.0.1.2.0",
     "summary": """
         Este módulo implementa la administración y gestión de los números de
          comprobantes fiscales para el cumplimento de la norma 06-18 de la
@@ -43,15 +43,14 @@
         "data/ir_cron_data.xml",
         "security/res_groups.xml",
         "security/ir.model.access.csv",
-        # "wizard/account_invoice_cancel_view.xml",
+        "wizard/account_invoice_cancel_view.xml",
         # "wizard/account_invoice_refund.xml",
-        # "views/account_invoice_view.xml",
-        # "views/account_view.xml",
+        "views/account_move_view.xml",
+        "views/account_view.xml",
         "views/res_currency_view.xml",
         # "views/assets_backend.xml",
         "views/ir_sequence_view.xml",
         "views/res_view.xml",
     ],
-    # "demo": ["demo/res_partner_demo.xml"],
-    # "qweb": ["static/src/xml/ncf_manager.xml"],
+    "demo": ["demo/res_partner_demo.xml"],
 }
