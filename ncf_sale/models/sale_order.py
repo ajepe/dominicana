@@ -25,7 +25,6 @@ _logger = logging.getLogger(__name__)
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    @api.multi
     def _prepare_invoice(self):
         """
         Prepare the dict of values to create the new invoice for a sales order.

@@ -21,7 +21,6 @@ from odoo import models, api
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    @api.multi
     def action_view_invoice(self):
         result = super(PurchaseOrder, self).action_view_invoice()
         supplier = self.partner_id

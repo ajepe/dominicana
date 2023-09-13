@@ -19,31 +19,32 @@ from odoo import models, api
 
 
 class AccountInvoice(models.Model):
-    _inherit = "account.invoice"
+    _inherit = "account.move"
 
-    @api.onchange("partner_id")
-    def onchange_partnerid(self):
+    def _onchange_partner_id(self):
+        res = super()._onchange_partner_id()
 
-        if self.partner_id and self.type == "in_invoice":
+        if self.partner_id and self.move_type == "in_invoice":
             if self.partner_id.purchase_journal_id:
                 self.journal_id = self.partner_id.purchase_journal_id
 
-        elif self.type == "in_invoice" and self.env.context.get("default_purchase_id"):
+        elif self.move_type == "in_invoice" and self.env.context.get(
+            "default_purchase_id"
+        ):
             purchase_order = self.env["purchase.order"]
             po = purchase_order.browse(self.env.context.get("default_purchase_id"))
             supplier = po.partner_id
             if supplier.purchase_journal_id:
                 self.journal_id = supplier.purchase_journal_id
 
-    @api.onchange("purchase_id")
-    def purchase_order_change(self):
+        return res
+
+    def _onchange_purchase_auto_complete(self):
         """This method is being overwritten as Odoo uses the purchase reference
         and puts it into the invoice reference (our NCF), we change this
         behaviour to use the invoice name (description)"""
-        if not self.purchase_id:
-            return {}
-        if not self.partner_id:
-            self.partner_id = self.purchase_id.partner_id.id
+
+        res = super()._onchange_purchase_auto_complete()
 
         vendor_ref = self.purchase_id.partner_ref
         if vendor_ref:
@@ -53,18 +54,4 @@ class AccountInvoice(models.Model):
                 if (self.name and vendor_ref not in self.name)
                 else vendor_ref
             )
-
-        new_lines = self.env["account.invoice.line"]
-        for line in self.purchase_id.order_line - self.invoice_line_ids.mapped(
-            "purchase_line_id"
-        ):
-            data = self._prepare_invoice_line_from_po_line(line)
-            new_line = new_lines.new(data)
-            new_line._set_additional_fields(self)
-            new_lines += new_line
-
-        self.invoice_line_ids += new_lines
-        self.payment_term_id = self.purchase_id.payment_term_id
-        self.env.context = dict(self.env.context, from_purchase_order_change=True)
-        self.purchase_id = False
-        return {}
+        return res

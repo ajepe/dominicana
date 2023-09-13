@@ -344,16 +344,15 @@ class DgiiReport(models.Model):
             self.env["account.move"]
             .search(
                 [
-                    ("fiscal_status", "=", "normal"),
+                    # ("fiscal_status", "=", "normal"),
                     ("state", "=", "paid"),
-                    ("payment_date", "<=", start_date),
+                    ("date", "<=", start_date),
                     ("company_id", "=", self.company_id.id),
-                    ("type", "in", types),
+                    ("move_type", "in", types),
                 ]
             )
             .filtered(
-                lambda inv: self.get_date_tuple(inv.payment_date)
-                == (period.year, period.month)
+                lambda inv: self.get_date_tuple(inv.date) == (period.year, period.month)
             )
         )
 
@@ -375,13 +374,13 @@ class DgiiReport(models.Model):
             self.env["account.move"]
             .search(
                 [
-                    ("date_invoice", ">=", start_date),
-                    ("date_invoice", "<=", end_date),
+                    ("invoice_date", ">=", start_date),
+                    ("invoice_date", "<=", end_date),
                     ("company_id", "=", self.company_id.id),
                     ("state", "in", states),
-                    ("type", "in", types),
+                    ("move_type", "in", types),
                 ],
-                order="date_invoice asc",
+                order="invoice_date asc",
             )
             .filtered(
                 lambda inv: (inv.journal_id.purchase_type != "others")
@@ -523,6 +522,7 @@ class DgiiReport(models.Model):
         :param invoice: account.move object
         :return: boolean
         """
+        return []
         if not invoice.payment_date:
             return False
 
@@ -567,8 +567,8 @@ class DgiiReport(models.Model):
                     "modified_invoice_number": inv.origin_out
                     if inv.type == "in_refund"
                     else False,
-                    "invoice_date": inv.date_invoice,
-                    "payment_date": inv.payment_date if show_payment_date else False,
+                    "invoice_date": inv.invoice_date,
+                    # "payment_date": inv.payment_date if show_payment_date else False,
                     "service_total_amount": inv.service_total_amount,
                     "good_total_amount": inv.good_total_amount,
                     "invoiced_amount": inv.amount_untaxed_signed,
@@ -620,8 +620,8 @@ class DgiiReport(models.Model):
     def include_payment(invoice_id, payment_id):
         """Returns True if payment date is on or before current period"""
 
-        p_date = payment_id.payment_date
-        i_date = invoice_id.date_invoice
+        p_date = payment_id.date
+        i_date = invoice_id.invoice_date
 
         return (
             True
@@ -634,7 +634,7 @@ class DgiiReport(models.Model):
         Payment = self.env["account.payment"]
         Invoice = self.env["account.move"]
 
-        if invoice_id.type == "out_invoice":
+        if invoice_id.move_type == "out_invoice":
             for payment in invoice_id._get_invoice_payment_widget():
                 payment_id = Payment.browse(payment["account_payment_id"])
                 if payment_id:
@@ -936,8 +936,8 @@ class DgiiReport(models.Model):
                     and inv.origin_out[-10:-8] in ["01", "02", "14", "15"]
                     else False,
                     "income_type": inv.income_type,
-                    "invoice_date": inv.date_invoice,
-                    "withholding_date": inv.payment_date
+                    "invoice_date": inv.invoice_date,
+                    "withholding_date": inv.date
                     if (inv.type != "out_refund" and show_payment_date)
                     else False,
                     "invoiced_amount": inv.amount_untaxed_signed,
@@ -1061,7 +1061,7 @@ class DgiiReport(models.Model):
                     "line": line,
                     "invoice_partner_id": inv.partner_id.id,
                     "fiscal_invoice_number": inv.reference,
-                    "invoice_date": inv.date_invoice,
+                    "invoice_date": inv.invoice_date,
                     "anulation_type": inv.anulation_type,
                     "invoice_id": inv.id,
                 }
@@ -1160,7 +1160,7 @@ class DgiiReport(models.Model):
                     "service_type_detail": inv.service_type_detail.code,
                     "related_part": int(inv.partner_id.related),
                     "doc_number": inv.number,
-                    "doc_date": inv.date_invoice,
+                    "doc_date": inv.invoice_date,
                     "invoiced_amount": inv.amount_untaxed_signed,
                     "isr_withholding_date": inv.payment_date
                     if inv.payment_date
@@ -1251,8 +1251,8 @@ class DgiiReport(models.Model):
         invoice_ids = self.env["account.move"].search(
             [
                 ("state", "=", "paid"),
-                ("fiscal_status", "=", "normal"),
-                ("payment_date", "=", False),
+                # ("fiscal_status", "=", "normal"),
+                # ("payment_date", "=", False),
             ]
         )
         invoice_ids.write({"fiscal_status": "done"})

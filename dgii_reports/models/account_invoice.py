@@ -495,7 +495,7 @@ class AccountInvoice(models.Model):
     )
 
     @api.model
-    def norma_recompute(self):
+    def recompute(self):
         """
         This method add all compute fields into []env
         add_todo and then recompute
@@ -508,4 +508,4 @@ class AccountInvoice(models.Model):
             if v.get("store") and v.get("depends"):
                 self.env.add_todo(self._fields[k], invoice_ids)
 
-        self.recompute()
+        return super().recompute()

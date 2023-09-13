@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <record id="dgii_report_form_view" model="ir.ui.view">
         <field name="name">dgii.reports.form.view</field>
         <field name="model">dgii.reports</field>
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="generate_report" string="Generate Statements" type="object"
-                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <button name="generate_report" string="Generate Statements" type="object"
-                            attrs="{'invisible': [('state', '!=', 'generated')]}"/>
-                    <button name="state_sent" string="Set as sent" type="object"
-                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'generated')]}"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,generated,sent"/>
+                    <button attrs="{'invisible': [('state', '!=', 'draft')]}" class="oe_highlight" name="generate_report" string="Generate Statements" type="object"/>
+                    <button attrs="{'invisible': [('state', '!=', 'generated')]}" name="generate_report" string="Generate Statements" type="object"/>
+                    <button attrs="{'invisible': [('state', '!=', 'generated')]}" class="oe_highlight" name="state_sent" string="Set as sent" type="object"/>
+                    <field name="state" statusbar_visible="draft,generated,sent" widget="statusbar"/>
                 </header>
                 <sheet>
                     <group>
@@ -24,10 +20,10 @@
                                 </h1>
                             </div>
                         </group>
-                        <field name="previous_report_pending" invisible="1"/>
+                        <field invisible="1" name="previous_report_pending"/>
                         <group attrs="{'invisible': [('previous_report_pending', '=', False)]}">
                             <div class="alert alert-warning info_icon" role="alert">
-                                <span class="fa fa-lightbulb-o fa-lg" title="Info" aria-label="Info"/>
+                                <span aria-label="Info" class="fa fa-lightbulb-o fa-lg" title="Info"/>
                                 <p>The previous report is still not marked as sent.</p>
                                 <p>Not setting a report as sent may throw inconsistencies
                                     regarding invoices withholding dates.
@@ -39,16 +35,14 @@
                         <page name="statements" string="Statements">
                             <group>
                                 <group>
-                                    <field name="name" placeholder="MM/YYYY"
-                                           attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                    <field attrs="{'readonly': [('state', '!=', 'draft')]}" name="name" placeholder="MM/YYYY"/>
                                     <field name="previous_balance" readonly="1"/>
                                 </group>
                             </group>
-
                             <div class="row">
                                 <div class="col-md-3">
-                                    <group name="606" col="2" class="bs-callout-info">
-                                        <button type="object" name="get_606_tree_view">
+                                    <group class="bs-callout-info" col="2" name="606">
+                                        <button name="get_606_tree_view" type="object">
                                             <h2>606</h2>
                                         </button>
                                         <field name="purchase_records" readonly="1"/>
@@ -69,8 +63,8 @@
                                     </group>
                                 </div>
                                 <div class="col-md-3">
-                                    <group name="607" class="bs-callout-success">
-                                        <button type="object" name="get_607_tree_view">
+                                    <group class="bs-callout-success" name="607">
+                                        <button name="get_607_tree_view" type="object">
                                             <h2>607</h2>
                                         </button>
                                         <field name="sale_records" readonly="1"/>
@@ -87,16 +81,16 @@
                                     </group>
                                 </div>
                                 <div class="col-md-3">
-                                    <group name="608" class="bs-callout-warning">
-                                        <button type="object" name="get_608_tree_view">
+                                    <group class="bs-callout-warning" name="608">
+                                        <button name="get_608_tree_view" type="object">
                                             <h2>608</h2>
                                         </button>
                                         <field name="cancel_records" readonly="1"/>
                                     </group>
                                 </div>
                                 <div class="col-md-3">
-                                    <group name="609" class="bs-callout-danger">
-                                        <button type="object" name="get_609_tree_view">
+                                    <group class="bs-callout-danger" name="609">
+                                        <button name="get_609_tree_view" type="object">
                                             <h2>609</h2>
                                         </button>
                                         <field name="exterior_records" readonly="1"/>
@@ -111,27 +105,27 @@
                         <page name="files" string="TXT Files">
                             <group>
                                 <group>
-                                    <field name="purchase_binary" filename="purchase_filename" readonly="1"/>
-                                    <field name="purchase_filename" invisible="1"/>
-                                    <field name="sale_binary" filename="sale_filename" readonly="1"/>
-                                    <field name="sale_filename" invisible="1"/>
-                                    <field name="cancel_binary" filename="cancel_filename" readonly="1"/>
-                                    <field name="cancel_filename" invisible="1"/>
-                                    <field name="exterior_binary" filename="exterior_filename" readonly="1"/>
-                                    <field name="exterior_filename" invisible="1"/>
+                                    <field filename="purchase_filename" name="purchase_binary" readonly="1"/>
+                                    <field invisible="1" name="purchase_filename"/>
+                                    <field filename="sale_filename" name="sale_binary" readonly="1"/>
+                                    <field invisible="1" name="sale_filename"/>
+                                    <field filename="cancel_filename" name="cancel_binary" readonly="1"/>
+                                    <field invisible="1" name="cancel_filename"/>
+                                    <field filename="exterior_filename" name="exterior_binary" readonly="1"/>
+                                    <field invisible="1" name="exterior_filename"/>
                                 </group>
                             </group>
                         </page>
                         <page name="it1" string="IT-1">
                             <group string="607 Reported Operations by NCF Type">
-                                <field name="ncf_sale_summary_ids" nolabel="1" widget="one2many_list" readonly="1">
+                                <field name="ncf_sale_summary_ids" nolabel="1" readonly="1" widget="one2many_list">
                                     <tree create="false" edit="false">
-                                        <field name="sequence" invisible="1"/>
+                                        <field invisible="1" name="sequence"/>
                                         <field name="name"/>
                                         <field name="qty"/>
                                         <field name="amount" sum="Operations Total"/>
-                                        <field name="currency_id" invisible="1"/>
-                                        <field name="dgii_report_id" invisible="1"/>
+                                        <field invisible="1" name="currency_id"/>
+                                        <field invisible="1" name="dgii_report_id"/>
                                     </tree>
                                 </field>
                             </group>
@@ -178,18 +172,15 @@
                                 </group>
                             </group>
                         </page>
-
                     </notebook>
-
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field groups="base.group_user" name="message_follower_ids" widget="mail_followers"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
             </form>
         </field>
     </record>
-
     <record id="dgii_report_tree_view" model="ir.ui.view">
         <field name="name">dgii.reports.tree.view</field>
         <field name="model">dgii.reports</field>
@@ -204,7 +195,6 @@
             </tree>
         </field>
     </record>
-
     <record id="dgii_report_search_view" model="ir.ui.view">
         <field name="name">dgii.reports.search.view</field>
         <field name="model">dgii.reports</field>
@@ -214,39 +204,26 @@
             </search>
         </field>
     </record>
-
     <record id="dgii_report_action" model="ir.actions.act_window">
         <field name="name">Reports</field>
         <field name="res_model">dgii.reports</field>
-        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="dgii_report_search_view"/>
+         <field name="search_view_id" ref="dgii_report_search_view"/>
         <field name="help" type="html">
-            <p class="oe_view_nocontent_create"></p>
+            <p class="oe_view_nocontent_create"/>
             <p>You can create your DGII Tax Statements here.</p>
         </field>
     </record>
-
-    <menuitem id="marcos_account_dgii_menu" name="DGII"
-              parent="account.menu_finance"
-              sequence="5"
-              groups="account.group_account_user"/>
-
-    <menuitem id="dgii_report_parent_menu" name="Data Sending"
-              parent="marcos_account_dgii_menu"
-              sequence="5"/>
-
-    <menuitem action="dgii_report_action" id="dgii_report_menu"
-              parent="dgii_report_parent_menu"
-              sequence="14"/>
-
+    <menuitem id="marcos_account_dgii_menu" name="DGII" parent="account.menu_finance_reports" sequence="5">
+        <menuitem action="dgii_report_action" id="dgii_report_menu"/>
+    </menuitem>
     <!--606-->
     <record id="dgii_report_purchase_line_tree" model="ir.ui.view">
         <field name="name">dgii.reports.purchase.line.tree</field>
         <field name="model">dgii.reports.purchase.line</field>
         <field name="arch" type="xml">
             <tree create="false" edit="false">
-                <field name="dgii_report_id" invisible="1"/>
+                <field invisible="1" name="dgii_report_id"/>
                 <field name="line"/>
                 <field name="rnc_cedula" widget="dgii_reports_url"/>
                 <field name="invoice_partner_id"/>
@@ -275,15 +252,13 @@
             </tree>
         </field>
     </record>
-
     <!--607-->
     <record id="dgii_report_sale_line_tree" model="ir.ui.view">
         <field name="name">dgii.reports.sale.line.tree</field>
         <field name="model">dgii.reports.sale.line</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false"
-                  decoration-muted="(invoiced_amount &lt; 250000) and (identification_type == '2')">
-                <field name="dgii_report_id" invisible="1"/>
+            <tree create="false" decoration-muted="(invoiced_amount &lt; 250000) and (identification_type == '2')" edit="false">
+                <field invisible="1" name="dgii_report_id"/>
                 <field name="line"/>
                 <field name="rnc_cedula" widget="dgii_reports_url"/>
                 <field name="invoice_partner_id"/>
@@ -312,14 +287,13 @@
             </tree>
         </field>
     </record>
-
     <!--608-->
     <record id="dgii_cancel_report_line_tree" model="ir.ui.view">
         <field name="name">dgii.reports.cancel.line.tree</field>
         <field name="model">dgii.reports.cancel.line</field>
         <field name="arch" type="xml">
             <tree create="false" edit="false">
-                <field name="dgii_report_id" invisible="1"/>
+                <field invisible="1" name="dgii_report_id"/>
                 <field name="line"/>
                 <field name="invoice_partner_id"/>
                 <field name="fiscal_invoice_number" widget="dgii_reports_url"/>
@@ -328,14 +302,13 @@
             </tree>
         </field>
     </record>
-
     <!--609-->
     <record id="dgii_exterior_report_line_tree" model="ir.ui.view">
         <field name="name">dgii.exterior.cancel.line.tree</field>
         <field name="model">dgii.reports.exterior.line</field>
         <field name="arch" type="xml">
             <tree create="false" edit="false">
-                <field name="dgii_report_id" invisible="1"/>
+                <field invisible="1" name="dgii_report_id"/>
                 <field name="line"/>
                 <field name="legal_name"/>
                 <field name="tax_id_type"/>
@@ -353,76 +326,17 @@
             </tree>
         </field>
     </record>
-
-
     <!-- Search views -->
-
-    <record id="dgii_report_purchase_line_search" model="ir.ui.view">
-        <field name="name">dgii.report.purchase.line.search</field>
-        <field name="model">dgii.reports.purchase.line</field>
-        <field name="arch" type="xml">
-            <search string="Search Purchase Line">
-                <!-- Search fields -->
-                <field name="invoice_partner_id"/>
-                <field name="rnc_cedula"/>
-                <field name="fiscal_invoice_number"/>
-                <field name="modified_invoice_number"/>
-                <!-- Filters -->
-                <filter string="Physical person" name="identification_type" domain="[('identification_type','=', '2')]"/>
-                <filter string="Legal person" name="identification_type" domain="[('identification_type','=', '1')]"/>
-                <separator/>
-                <filter string="Paid" name="paid" domain="[('invoice_id.state','=','paid')]"/>
-                <filter string="Open" name="open" domain="[('invoice_id.state','!=','paid')]"/>
-                <filter string="ITBIS withholding" name="withholding" domain="[('withholded_itbis', '!=', 0)]"/>
-                <filter string="ISR withholding" name="withholding" domain="[('income_withholding', '!=', 0)]"/>
-                <!-- Groups -->
-                <group expand="0" string="Group By">
-                    <filter string="Contact" name="invoice_partner_id" domain="[]"
-                            context="{'group_by':'invoice_partner_id'}"/>
-                    <filter string="Identification type" name="identification_type" domain="[]"
-                            context="{'group_by':'identification_type'}"/>
-                    <filter string="Expense type" name="expense_type" domain="[]"
-                            context="{'group_by':'expense_type'}"/>
-                    <filter string="Withholding type" name="isr_withholding_type" domain="[]"
-                            context="{'group_by':'isr_withholding_type'}"/>
-                    <filter string="Payment type" name="payment_type" domain="[]"
-                            context="{'group_by':'payment_type'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
-
-    <record id="dgii_report_sale_line_search" model="ir.ui.view">
-        <field name="name">dgii.report.sale.line.search</field>
-        <field name="model">dgii.reports.sale.line</field>
-        <field name="arch" type="xml">
-            <search string="Search Sale Line">
-                <!-- Search fields -->
-                <field name="invoice_partner_id"/>
-                <field name="rnc_cedula"/>
-                <field name="fiscal_invoice_number"/>
-                <field name="modified_invoice_number"/>
-                <!-- Filters -->
-                <filter string="Physical person" name="identification_type" domain="[('identification_type','=', '2')]"/>
-                <filter string="Legal person" name="identification_type" domain="[('identification_type','=', '1')]"/>
-                <separator/>
-                <filter string="Paid" name="paid" domain="[('invoice_id.state','=','paid')]"/>
-                <filter string="Open" name="open" domain="[('invoice_id.state','!=','paid')]"/>
-                <filter string="ITBIS withholding" name="withholding" domain="[('third_withheld_itbis', '!=', 0)]"/>
-                <filter string="ISR withholding" name="withholding" domain="[('third_income_withholding', '!=', 0)]"/>
-                <!-- Groups -->
-                <group expand="0" string="Group By">
-                    <filter string="Contact" name="invoice_partner_id" domain="[]"
-                            context="{'group_by':'invoice_partner_id'}"/>
-                    <filter string="Identification type" name="identification_type" domain="[]"
-                            context="{'group_by':'identification_type'}"/>
-                    <filter string="Income type" name="income_type" domain="[]"
-                            context="{'group_by':'income_type'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
-
+    <!--     <record id="dgii_report_purchase_line_search" model="ir.ui.view"><field name="name">dgii.report.purchase.line.search</field><field name="model">dgii.reports.purchase.line</field><field name="arch" type="xml"><search string="Search Purchase Line"><field name="invoice_partner_id"/><field name="rnc_cedula"/><field name="fiscal_invoice_number"/><field name="modified_invoice_number"/><filter string="Physical person" name="identification_type" domain="[('identification_type','=', '2')]"/><filter string="Legal person" name="identification_type" domain="[('identification_type','=', '1')]"/><separator/><filter string="Paid" name="paid" domain="[('invoice_id.state','=','paid')]"/><filter string="Open" name="open" domain="[('invoice_id.state','!=','paid')]"/><filter string="ITBIS withholding" name="withholding" domain="[('withholded_itbis', '!=', 0)]"/><filter string="ISR withholding" name="withholding" domain="[('income_withholding', '!=', 0)]"/><group expand="0" string="Group By"><filter string="Contact" name="invoice_partner_id" domain="[]"
+                            context="{'group_by':'invoice_partner_id'}"/><filter string="Identification type" name="identification_type" domain="[]"
+                            context="{'group_by':'identification_type'}"/><filter string="Expense type" name="expense_type" domain="[]"
+                            context="{'group_by':'expense_type'}"/><filter string="Withholding type" name="isr_withholding_type" domain="[]"
+                            context="{'group_by':'isr_withholding_type'}"/><filter string="Payment type" name="payment_type" domain="[]"
+                            context="{'group_by':'payment_type'}"/></group></search></field></record>-->
+    <!--   <record id="dgii_report_sale_line_search" model="ir.ui.view"><field name="name">dgii.report.sale.line.search</field><field name="model">dgii.reports.sale.line</field><field name="arch" type="xml"><search string="Search Sale Line"><field name="invoice_partner_id"/><field name="rnc_cedula"/><field name="fiscal_invoice_number"/><field name="modified_invoice_number"/><filter string="Physical person" name="identification_type" domain="[('identification_type','=', '2')]"/><filter string="Legal person" name="identification_type" domain="[('identification_type','=', '1')]"/><separator/><filter string="Paid" name="paid" domain="[('invoice_id.state','=','paid')]"/><filter string="Open" name="open" domain="[('invoice_id.state','!=','paid')]"/><filter string="ITBIS withholding" name="withholding" domain="[('third_withheld_itbis', '!=', 0)]"/><filter string="ISR withholding" name="withholding" domain="[('third_income_withholding', '!=', 0)]"/><group expand="0" string="Group By"><filter string="Contact" name="invoice_partner_id" domain="[]"
+                            context="{'group_by':'invoice_partner_id'}"/><filter string="Identification type" name="identification_type" domain="[]"
+                            context="{'group_by':'identification_type'}"/><filter string="Income type" name="income_type" domain="[]"
+                            context="{'group_by':'income_type'}"/></group></search></field></record>-->
     <record id="dgii_report_cancel_line_search" model="ir.ui.view">
         <field name="name">dgii.report.cancel.line.search</field>
         <field name="model">dgii.reports.cancel.line</field>
@@ -433,30 +347,11 @@
                 <field name="fiscal_invoice_number"/>
                 <!-- Groups -->
                 <group expand="0" string="Group By">
-                    <filter string="Contact" name="invoice_partner_id" domain="[]"
-                            context="{'group_by':'invoice_partner_id'}"/>
-                    <filter string="Anulation type" name="anulation_type" domain="[]"
-                            context="{'group_by':'anulation_type'}"/>
+                    <filter context="{'group_by':'invoice_partner_id'}" domain="[]" name="invoice_partner_id" string="Contact"/>
+                    <filter context="{'group_by':'anulation_type'}" domain="[]" name="anulation_type" string="Anulation type"/>
                 </group>
             </search>
         </field>
     </record>
-
-    <record id="dgii_report_exterior_line_search" model="ir.ui.view">
-        <field name="name">dgii.report.exterior.line.search</field>
-        <field name="model">dgii.reports.exterior.line</field>
-        <field name="arch" type="xml">
-            <search string="Search Sale Line">
-                <!-- Search fields -->
-                <field name="legal_name"/>
-                <field name="tax_id"/>
-                <field name="doc_number"/>
-                <!-- Filters -->
-                <filter string="Paid" name="paid" domain="[('invoice_id.state','=','paid')]"/>
-                <filter string="Open" name="open" domain="[('invoice_id.state','!=','paid')]"/>
-                <filter string="Withholded ISR" name="withholding" domain="[('withholded_isr', '!=', 0)]"/>
-            </search>
-        </field>
-    </record>
-
+    <!--  <record id="dgii_report_exterior_line_search" model="ir.ui.view"><field name="name">dgii.report.exterior.line.search</field><field name="model">dgii.reports.exterior.line</field><field name="arch" type="xml"><search string="Search Sale Line"><field name="legal_name"/><field name="tax_id"/><field name="doc_number"/><filter string="Paid" name="paid" domain="[('invoice_id.state','=','paid')]"/><filter string="Open" name="open" domain="[('invoice_id.state','!=','paid')]"/><filter string="Withholded ISR" name="withholding" domain="[('withholded_isr', '!=', 0)]"/></search></field></record>-->
 </odoo>
