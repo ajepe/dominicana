@@ -19,7 +19,7 @@
                     <br/>
                     <span>
                         <strong>Fecha:</strong>
-                        <span t-field="o.date_invoice"/>
+                        <span t-field="o.invoice_date"/>
                     </span>
                     <br/>
                     <span t-if="o.date_due and o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">
@@ -253,7 +253,6 @@
                 </span>
             </t>
         </xpath>
-        <xpath expr="/t/t/div/div[3]/div[1]/div/table/t/tr/t[2]/td[1]/span[2]" position="replace"/>
 
         <xpath expr="//div[@id='total']" position="after">
             <div class="text-muted text-right">

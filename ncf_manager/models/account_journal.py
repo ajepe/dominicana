@@ -54,7 +54,6 @@ class AccountJournal(models.Model):
             ("others", "Otras Formas de Venta"),
         ],
         string="Forma de Pago",
-        oldname="ipf_payment_type",
     )
 
     ncf_remote_validation = fields.Boolean("Validar con DGII", default=False)

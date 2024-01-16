@@ -21,7 +21,7 @@ from odoo import models, api
 
 
 class AccountInvoiceLine(models.Model):
-    _inherit = "account.invoice.line"
+    _inherit = "account.move.line"
 
     def _get_tax_group_name(self, tax):
         tax_id = self.env["account.tax"].browse(tax)
@@ -30,7 +30,6 @@ class AccountInvoiceLine(models.Model):
         else:
             return ""
 
-    @api.multi
     def get_itbis_amount(self, invoice_id, price_unit, discount):
         self.ensure_one()
         currency = invoice_id and invoice_id.currency_id or None
