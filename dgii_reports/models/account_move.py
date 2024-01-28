@@ -21,7 +21,7 @@ class AccountInvoice(models.Model):
     _inherit = "account.move"
 
     def _get_invoice_payment_widget(self):
-        j = json.loads(self.payments_widget)
+        j = json.loads(self.invoice_outstanding_credits_debits_widget)
         return j["content"] if j else []
 
     def _compute_invoice_payment_date(self):

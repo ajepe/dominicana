@@ -370,16 +370,18 @@ class DgiiReport(models.Model):
         start_date = "{}-{}-01".format(year, month)
         end_date = "{}-{}-{}".format(year, month, last_day)
 
+        domain = [
+            ("invoice_date", ">=", start_date),
+            ("invoice_date", "<=", end_date),
+            ("company_id", "=", self.company_id.id),
+            ("state", "in", states),
+            ("move_type", "in", types),
+        ]
+
         invoice_ids = (
             self.env["account.move"]
             .search(
-                [
-                    ("invoice_date", ">=", start_date),
-                    ("invoice_date", "<=", end_date),
-                    ("company_id", "=", self.company_id.id),
-                    ("state", "in", states),
-                    ("move_type", "in", types),
-                ],
+                domain,
                 order="invoice_date asc",
             )
             .filtered(
@@ -434,6 +436,7 @@ class DgiiReport(models.Model):
             if values["modified_invoice_number"]
             else ""
         ).ljust(19)
+        print("!!!!!!!!!!!!!!!!!!!", values)
         INV_DATE = str(self._get_formated_date(values["invoice_date"])).ljust(8)
         PAY_DATE = str(self._get_formated_date(values["payment_date"])).ljust(8)
         SERV_AMOUNT = self._get_formated_amount(values["service_total_amount"])
@@ -465,7 +468,7 @@ class DgiiReport(models.Model):
                 NCF,
                 NCM,
                 INV_DATE,
-                PAY_DATE,
+                # PAY_DATE,
                 SERV_AMOUNT,
                 GOOD_AMOUNT,
                 INV_AMOUNT,
@@ -544,6 +547,8 @@ class DgiiReport(models.Model):
                 ["open", "in_payment", "paid"], ["in_invoice", "in_refund"]
             )
 
+            print("!!!!!!!!!!!!!!!!!!!!!!", invoice_ids)
+
             line = 0
             report_data = ""
             for inv in invoice_ids:
@@ -565,10 +570,10 @@ class DgiiReport(models.Model):
                     "expense_type": inv.expense_type if inv.expense_type else False,
                     "fiscal_invoice_number": inv.reference,
                     "modified_invoice_number": inv.origin_out
-                    if inv.type == "in_refund"
+                    if inv.move_type == "in_refund"
                     else False,
                     "invoice_date": inv.invoice_date,
-                    # "payment_date": inv.payment_date if show_payment_date else False,
+                    "payment_date": inv.payment_date if show_payment_date else False,
                     "service_total_amount": inv.service_total_amount,
                     "good_total_amount": inv.good_total_amount,
                     "invoiced_amount": inv.amount_untaxed_signed,
@@ -591,7 +596,7 @@ class DgiiReport(models.Model):
                     "payment_type": inv.payment_form,
                     "invoice_partner_id": inv.partner_id.id,
                     "invoice_id": inv.id,
-                    "credit_note": True if inv.type == "in_refund" else False,
+                    "credit_note": True if inv.move_type == "in_refund" else False,
                 }
                 PurchaseLine.create(values)
                 report_data += self.process_606_report_data(values) + "\n"
@@ -660,7 +665,7 @@ class DgiiReport(models.Model):
                     )
 
             payments_dict["credit"] += self._convert_to_user_currency(
-                invoice_id.currency_id, invoice_id.date, invoice_id.residual
+                invoice_id.currency_id, invoice_id.date, invoice_id.amount_residual
             )
 
         return payments_dict
@@ -741,10 +746,10 @@ class DgiiReport(models.Model):
 
     def _process_op_dict(self, args, invoice):
         op_dict = args
-        if invoice.sale_fiscal_type and invoice.type != "out_refund":
+        if invoice.sale_fiscal_type and invoice.move_type != "out_refund":
             op_dict[invoice.sale_fiscal_type]["qty"] += 1
             op_dict[invoice.sale_fiscal_type]["amount"] += invoice.amount_untaxed_signed
-        if invoice.type == "out_refund" and not invoice.is_nd:
+        if invoice.move_type == "out_refund" and not invoice.is_nd:
             op_dict["nc"]["qty"] += 1
             op_dict["nc"]["amount"] += invoice.amount_untaxed_signed
         if invoice.is_nd:
@@ -938,7 +943,7 @@ class DgiiReport(models.Model):
                     "income_type": inv.income_type,
                     "invoice_date": inv.invoice_date,
                     "withholding_date": inv.date
-                    if (inv.type != "out_refund" and show_payment_date)
+                    if (inv.move_type != "out_refund" and show_payment_date)
                     else False,
                     "invoiced_amount": inv.amount_untaxed_signed,
                     "invoiced_itbis": inv.invoiced_itbis,
@@ -955,7 +960,7 @@ class DgiiReport(models.Model):
                     "legal_tip": inv.legal_tip,
                     "invoice_partner_id": inv.partner_id.id,
                     "invoice_id": inv.id,
-                    "credit_note": True if inv.type == "out_refund" else False,
+                    "credit_note": True if inv.move_type == "out_refund" else False,
                     "cash": payments.get("cash"),
                     "bank": payments.get("bank"),
                     "card": payments.get("card"),
@@ -996,7 +1001,9 @@ class DgiiReport(models.Model):
 
                 for k in payment_dict:
                     payment_dict[k] += (
-                        payments[k] * -1 if inv.type == "out_refund" else payments[k]
+                        payments[k] * -1
+                        if inv.move_type == "out_refund"
+                        else payments[k]
                     )
 
             for k in op_dict:
@@ -1042,10 +1049,10 @@ class DgiiReport(models.Model):
             ).filtered(
                 lambda inv: (
                     (
-                        inv.type in ["in_invoice"]
+                        inv.move_type in ["in_invoice"]
                         and inv.journal_id.purchase_type != "normal"
                     )
-                    or (inv.type in ["out_invoice", "out_refund"])
+                    or (inv.move_type in ["out_invoice", "out_refund"])
                 )
             )
 
