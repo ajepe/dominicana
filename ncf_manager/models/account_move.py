@@ -106,7 +106,7 @@ class AccountInvoice(models.Model):
                             for dr in inv.journal_id.date_range_ids
                             if dr.sale_fiscal_type == inv.sale_fiscal_type
                         ][0]
-                    except IndexError:
+                    except IndexError as e:
                         raise ValidationError(
                             _("Error. No sequence range for NCF para: {}").format(
                                 inv.sale_fiscal_type

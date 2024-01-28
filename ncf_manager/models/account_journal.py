@@ -23,7 +23,11 @@ from odoo import models, fields, api
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
-    sequence_id = fields.Many2one(comodel_name="ir.sequence", string="Sequence")
+    sequence_id = fields.Many2one(
+        comodel_name="ir.sequence",
+        string="Sequence",
+        domain=[("ncf_control", "=", True)],
+    )
 
     @api.depends("ncf_control")
     def check_ncf_ready(self):
