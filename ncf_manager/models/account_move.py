@@ -34,7 +34,7 @@ except (ImportError, IOError) as err:
     _logger.debug(err)
 
 
-class AccountInvoice(models.Model):
+class AccountMove(models.Model):
     _inherit = "account.move"
 
     reference = fields.Char(string="NCF")
@@ -300,7 +300,7 @@ class AccountInvoice(models.Model):
 
     @api.onchange("journal_id")
     def _onchange_journal(self):
-        res = super(AccountInvoice, self)._onchange_journal()
+        res = super(AccountMove, self)._onchange_journal()
         if self.journal_id.type == "purchase":
             if self.journal_id.purchase_type == "minor":
                 self.partner_id = self.company_id.partner_id.id
@@ -321,7 +321,7 @@ class AccountInvoice(models.Model):
 
     @api.onchange("partner_id", "company_id")
     def _onchange_partner_id(self):
-        res = super(AccountInvoice, self)._onchange_partner_id()
+        res = super(AccountMove, self)._onchange_partner_id()
         if self.partner_id and self.move_type == "out_invoice":
             if self.journal_id.ncf_control:
                 self.sale_fiscal_type = self.partner_id.sale_fiscal_type
@@ -560,13 +560,13 @@ class AccountInvoice(models.Model):
                     )
                 )
 
-        return super(AccountInvoice, self).action_invoice_open()
+        return super(AccountMove, self).action_invoice_open()
 
     @api.model
     def _prepare_refund(
         self, invoice, invoice_date=None, date=None, description=None, journal_id=None
     ):
-        res = super(AccountInvoice, self)._prepare_refund(
+        res = super(AccountMove, self)._prepare_refund(
             invoice,
             invoice_date=invoice_date,
             date=date,
@@ -587,7 +587,7 @@ class AccountInvoice(models.Model):
             )
         return res
 
-    def invoice_validate(self):
+    def action_post(self):
         """After all invoice validation routine, consume a NCF sequence and
         write it into reference field.
         """
@@ -613,9 +613,9 @@ class AccountInvoice(models.Model):
                 self.reference = sequence_id.with_context(
                     sale_fiscal_type=self.journal_id.purchase_type
                 )._next()
-            self.move_id.write({"ref": self.reference})
+            self.write({"ref": self.reference})
 
-        return super(AccountInvoice, self).invoice_validate()
+        return super(AccountMove, self).action_post()
 
     @api.model
     def create(self, vals):
@@ -637,7 +637,7 @@ class AccountInvoice(models.Model):
                         )
                     )
 
-        return super(AccountInvoice, self).create(vals)
+        return super(AccountMove, self).create(vals)
 
     def action_invoice_cancel(self):
         fiscal_invoices = self.filtered(
@@ -649,4 +649,4 @@ class AccountInvoice(models.Model):
         ):
             raise AccessError("No tiene permitido cancelar Facturas Fiscales")
 
-        return super(AccountInvoice, self).action_invoice_cancel()
+        return super(AccountMove, self).action_invoice_cancel()
