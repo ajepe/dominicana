@@ -543,11 +543,7 @@ class DgiiReport(models.Model):
             PurchaseLine = self.env["dgii.reports.purchase.line"]
             PurchaseLine.search([("dgii_report_id", "=", rec.id)]).unlink()
 
-            invoice_ids = self._get_invoices(
-                ["open", "in_payment", "paid"], ["in_invoice", "in_refund"]
-            )
-
-            print("!!!!!!!!!!!!!!!!!!!!!!", invoice_ids)
+            invoice_ids = self._get_invoices(["posted"], ["in_invoice", "in_refund"])
 
             line = 0
             report_data = ""
@@ -905,9 +901,7 @@ class DgiiReport(models.Model):
             SaleLine = self.env["dgii.reports.sale.line"]
             SaleLine.search([("dgii_report_id", "=", rec.id)]).unlink()
 
-            invoice_ids = self._get_invoices(
-                ["open", "in_payment", "paid"], ["out_invoice", "out_refund"]
-            )
+            invoice_ids = self._get_invoices(["posted"], ["out_invoice", "out_refund"])
 
             line = 0
             excluded_line = line
@@ -1142,7 +1136,7 @@ class DgiiReport(models.Model):
             ExteriorLine.search([("dgii_report_id", "=", rec.id)]).unlink()
 
             invoice_ids = self._get_invoices(
-                ["open", "in_payment", "paid"], ["in_invoice", "in_refund"]
+                ["posted"], ["in_invoice", "in_refund"]
             ).filtered(
                 lambda inv: (inv.partner_id.country_id.code != "DO")
                 and (inv.journal_id.purchase_type == "exterior")

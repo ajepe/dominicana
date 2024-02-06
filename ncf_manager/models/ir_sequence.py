@@ -43,7 +43,8 @@ class IrSequence(models.Model):
     ncf_control = fields.Boolean("Control de NCF", default=False)
 
     def get_next_char(self, number_next):
-        sale_fiscal_type = self._context.get("sale_fiscal_type", False)
+        sale_fiscal_type = self.env.context.get("sale_fiscal_type", False)
+
         if sale_fiscal_type:
             return (
                 "B"
