@@ -17,15 +17,15 @@
     "depends": ["base", "account", "purchase", "l10n_do_accounting"],
     # always loaded
     "data": [
-        # "data/ir_config_parameter_data.xml",
-        # "data/invoice_service_type_detail_data.xml",
-        # "security/ir.model.access.csv",
-        # "security/ir_rule.xml",
-        # "views/res_partner_views.xml",
-        # "views/dgii_report_views.xml",
-        # "views/account_account_views.xml",
+        "data/ir_config_parameter_data.xml",
+        "data/invoice_service_type_detail_data.xml",
+        "security/ir.model.access.csv",
+        "security/ir_rule.xml",
+        "views/res_partner_views.xml",
+        "views/dgii_report_views.xml",
+        "views/account_account_views.xml",
         # "views/account_move_views.xml",
         # "views/account_tax.xml",
-        # "wizard/dgii_report_regenerate_wizard_views.xml",
+        "wizard/dgii_report_regenerate_wizard_views.xml",
     ],
 }

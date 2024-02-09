@@ -9,6 +9,9 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     related = fields.Selection(
-        [("0", "Not Related"), ("1", "Related")],
+        [
+            ("0", "Not Related"),
+            ("1", "Related"),
+        ],
         default="0",
     )
