@@ -24,8 +24,8 @@
         "views/res_partner_views.xml",
         "views/dgii_report_views.xml",
         "views/account_account_views.xml",
-        # "views/account_move_views.xml",
-        # "views/account_tax.xml",
+        "views/account_move_views.xml",
+        "views/account_tax.xml",
         "wizard/dgii_report_regenerate_wizard_views.xml",
     ],
 }

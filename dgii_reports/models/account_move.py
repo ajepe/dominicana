@@ -349,12 +349,12 @@ class AccountInvoice(models.Model):
             if inv.state != "draft":
                 inv.advance_itbis = inv.invoiced_itbis - inv.cost_itbis
 
-    @api.depends("journal_id.purchase_type")
-    def _compute_is_exterior(self):
-        for inv in self:
-            inv.is_exterior = (
-                True if inv.journal_id.purchase_type == "exterior" else False
-            )
+    # @api.depends("journal_id.purchase_type")
+    # def _compute_is_exterior(self):
+    #     for inv in self:
+    #         inv.is_exterior = (
+    #             True if inv.journal_id.purchase_type == "exterior" else False
+    #         )
 
     @api.onchange("service_type")
     def onchange_service_type(self):
@@ -452,7 +452,7 @@ class AccountInvoice(models.Model):
         store=True,
         currency_field="company_currency_id",
     )
-    is_exterior = fields.Boolean(compute="_compute_is_exterior", store=True)
+    # is_exterior = fields.Boolean(compute="_compute_is_exterior", store=True)
     service_type = fields.Selection(
         [
             ("01", "Gastos de Personal"),

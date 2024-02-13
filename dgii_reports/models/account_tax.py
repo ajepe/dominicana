@@ -4,6 +4,18 @@ from odoo import models, fields
 class AccountAccount(models.Model):
     _inherit = "account.tax"
 
+    purchase_tax_type = fields.Selection(
+        [
+            ("itbis", "ITBIS Pagado"),
+            ("ritbis", "ITBIS Retenido"),
+            ("isr", "ISR Retenido"),
+            ("rext", "Pagos al Exterior (Ley 253-12)"),
+            ("none", "No Deducible"),
+        ],
+        default="none",
+        string="Tipo de Impuesto en Compra",
+    )
+
     account_fiscal_type = fields.Selection(
         [
             ("A08", "A08 - Otras Operaciones (Positivas)"),
