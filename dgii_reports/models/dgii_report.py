@@ -3,8 +3,10 @@
 # © 2018 José López <jlopez@indexa.do>
 # © 2018 Gustavo Valverde <gustavo@iterativo.do>
 
-import calendar
 import base64
+import os
+import tempfile
+import calendar
 from datetime import datetime as dt
 
 from odoo import models, fields, api, _
@@ -20,6 +22,11 @@ except ImportError:
             "(See requirements file)"
         )
     )
+
+
+def agnostic_file_path(filename):
+    file_path = os.path.join(tempfile.gettempdir(), filename)
+    return file_path
 
 
 class DgiiReportSaleSummary(models.Model):
@@ -436,7 +443,6 @@ class DgiiReport(models.Model):
             if values["modified_invoice_number"]
             else ""
         ).ljust(19)
-        print("!!!!!!!!!!!!!!!!!!!", values)
         INV_DATE = str(self._get_formated_date(values["invoice_date"])).ljust(8)
         PAY_DATE = str(self._get_formated_date(values["payment_date"])).ljust(8)
         SERV_AMOUNT = self._get_formated_amount(values["service_total_amount"])
@@ -504,13 +510,13 @@ class DgiiReport(models.Model):
         header = "606|{}|{}|{}".format(str(company_vat).ljust(11), period, qty) + "\n"
         data = header + records
 
-        file_path = "/tmp/DGII_606_{}_{}.txt".format(company_vat, period)
+        file_path = agnostic_file_path("DGII_606_{}_{}.txt".format(company_vat, period))
         with open(file_path, "w", encoding="utf-8", newline="\r\n") as txt_606:
             txt_606.write(str(data))
 
         self.write(
             {
-                "purchase_filename": file_path.replace("/tmp/", ""),
+                "purchase_filename": file_path,
                 "purchase_binary": base64.b64encode(open(file_path, "rb").read()),
             }
         )
@@ -865,13 +871,13 @@ class DgiiReport(models.Model):
         header = "607|{}|{}|{}".format(str(company_vat).ljust(11), period, qty) + "\n"
         data = header + records
 
-        file_path = "/tmp/DGII_607_{}_{}.txt".format(company_vat, period)
+        file_path = agnostic_file_path("DGII_607_{}_{}.txt".format(company_vat, period))
         with open(file_path, "w", encoding="utf-8", newline="\r\n") as txt_607:
             txt_607.write(str(data))
 
         self.write(
             {
-                "sale_filename": file_path.replace("/tmp/", ""),
+                "sale_filename": file_path,
                 "sale_binary": base64.b64encode(open(file_path, "rb").read()),
             }
         )
@@ -1022,13 +1028,13 @@ class DgiiReport(models.Model):
         header = "608|{}|{}|{}".format(str(company_vat).ljust(11), period, qty) + "\n"
         data = header + records
 
-        file_path = "/tmp/DGII_608_{}_{}.txt".format(company_vat, period)
+        file_path = agnostic_file_path("DGII_608_{}_{}.txt".format(company_vat, period))
         with open(file_path, "w", encoding="utf-8", newline="\r\n") as txt_608:
             txt_608.write(str(data))
 
         self.write(
             {
-                "cancel_filename": file_path.replace("/tmp/", ""),
+                "cancel_filename": file_path,
                 "cancel_binary": base64.b64encode(open(file_path, "rb").read()),
             }
         )
@@ -1119,13 +1125,13 @@ class DgiiReport(models.Model):
         header = "609|{}|{}|{}".format(str(company_vat).ljust(11), period, qty) + "\n"
         data = header + records
 
-        file_path = "/tmp/DGII_609_{}_{}.txt".format(company_vat, period)
+        file_path = agnostic_file_path("DGII_609_{}_{}.txt".format(company_vat, period))
         with open(file_path, "w", encoding="utf-8", newline="\r\n") as txt_609:
             txt_609.write(str(data))
 
         self.write(
             {
-                "exterior_filename": file_path.replace("/tmp/", ""),
+                "exterior_filename": file_path,
                 "exterior_binary": base64.b64encode(open(file_path, "rb").read()),
             }
         )
