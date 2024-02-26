@@ -570,10 +570,8 @@ class DgiiReport(models.Model):
                     "rnc_cedula": rnc_ced[0] if rnc_ced else False,
                     "identification_type": rnc_ced[1] if rnc_ced else False,
                     "expense_type": inv.expense_type if inv.expense_type else False,
-                    "fiscal_invoice_number": inv.reference,
-                    "modified_invoice_number": inv.origin_out
-                    if inv.move_type == "in_refund"
-                    else False,
+                    "fiscal_invoice_number": inv.payment_reference,
+                    "modified_invoice_number": False,
                     "invoice_date": inv.invoice_date,
                     "payment_date": inv.payment_date if show_payment_date else False,
                     "service_total_amount": inv.service_total_amount,
@@ -748,15 +746,15 @@ class DgiiReport(models.Model):
 
     def _process_op_dict(self, args, invoice):
         op_dict = args
-        if invoice.sale_fiscal_type and invoice.move_type != "out_refund":
-            op_dict[invoice.sale_fiscal_type]["qty"] += 1
-            op_dict[invoice.sale_fiscal_type]["amount"] += invoice.amount_untaxed_signed
-        if invoice.move_type == "out_refund" and not invoice.is_nd:
+        print(invoice.fiscal_position_id, "@@@@@@@@@@@@@@@@@@@@@", invoice)
+        if invoice.fiscal_position_id and invoice.move_type != "out_refund":
+            op_dict[invoice.fiscal_position_id.name]["qty"] += 1
+            op_dict[invoice.fiscal_position_id.name][
+                "amount"
+            ] += invoice.amount_untaxed_signed
+        if invoice.move_type == "out_refund":
             op_dict["nc"]["qty"] += 1
             op_dict["nc"]["amount"] += invoice.amount_untaxed_signed
-        if invoice.is_nd:
-            op_dict["nd"]["qty"] += 1
-            op_dict["nd"]["amount"] += invoice.amount_untaxed_signed
 
         return op_dict
 
@@ -925,7 +923,7 @@ class DgiiReport(models.Model):
                 )
                 rnc_ced = (
                     self.formated_rnc_cedula(inv.partner_id.vat)
-                    if inv.sale_fiscal_type != "unico"
+                    if inv.fiscal_position_id.name != "unico"
                     else self.formated_rnc_cedula(inv.company_id.vat)
                 )
                 show_payment_date = self._include_in_current_report(inv)
@@ -935,11 +933,8 @@ class DgiiReport(models.Model):
                     "line": line,
                     "rnc_cedula": rnc_ced[0] if rnc_ced else False,
                     "identification_type": rnc_ced[1] if rnc_ced else False,
-                    "fiscal_invoice_number": inv.reference,
-                    "modified_invoice_number": inv.origin_out
-                    if inv.origin_out
-                    and inv.origin_out[-10:-8] in ["01", "02", "14", "15"]
-                    else False,
+                    "fiscal_invoice_number": inv.payment_reference,
+                    "modified_invoice_number": False,
                     "income_type": inv.income_type,
                     "invoice_date": inv.invoice_date,
                     "withholding_date": inv.date
@@ -1067,7 +1062,7 @@ class DgiiReport(models.Model):
                     "dgii_report_id": rec.id,
                     "line": line,
                     "invoice_partner_id": inv.partner_id.id,
-                    "fiscal_invoice_number": inv.reference,
+                    "fiscal_invoice_number": inv.payment_reference,
                     "invoice_date": inv.invoice_date,
                     "anulation_type": inv.anulation_type,
                     "invoice_id": inv.id,

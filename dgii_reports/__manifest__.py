@@ -26,6 +26,7 @@
         "views/account_account_views.xml",
         "views/account_move_views.xml",
         "views/account_tax.xml",
+        "views/account_journal.xml",
         "wizard/dgii_report_regenerate_wizard_views.xml",
     ],
 }

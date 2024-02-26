@@ -20,6 +20,19 @@ class InvoiceServiceTypeDetail(models.Model):
 class AccountInvoice(models.Model):
     _inherit = "account.move"
 
+    income_type = fields.Selection(
+        [
+            ("01", "01 - Ingresos por Operaciones (No Financieros)"),
+            ("02", "02 - Ingresos Financieros"),
+            ("03", "03 - Ingresos Extraordinarios"),
+            ("04", "04 - Ingresos por Arrendamientos"),
+            ("05", "05 - Ingresos por Venta de Activo Depreciable"),
+            ("06", "06 - Otros Ingresos"),
+        ],
+        string="Tipo de Ingreso",
+        default=lambda self: self._context.get("income_type", "01"),
+    )
+
     def _get_invoice_payment_widget(self):
         j = json.loads(self.invoice_outstanding_credits_debits_widget)
         return j["content"] if j else []
